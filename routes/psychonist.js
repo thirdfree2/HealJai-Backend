@@ -1,6 +1,7 @@
 var express = require("express");
 var router = express.Router();
 let dbCon = require("../lib/db");
+const bcrypt = require('bcrypt');
 
 router.get("/", (req, res, next) => {
   dbCon.query("SELECT * FROM doc_user_table ORDER BY id desc", (err, rows) => {
@@ -52,33 +53,48 @@ router.post("/add", (req, res, next) => {
   }
 
   if (!errors) {
-    let form_data = {
-      doc_username: doc_username,
-      doc_email: doc_email,
-      doc_password: doc_password,
-      doc_phonenumber: doc_phonenumber,
-      doc_address: doc_address,
-    };
-    dbCon.query(
-      "INSERT INTO doc_user_table SET ?",
-      form_data,
-      (err, result) => {
-        if (err) {
-          req.flash("error", err);
-          res.render("psychonist/add", {
-            doc_username: form_data.doc_username,
-            doc_email: form_data.doc_email,
-            doc_password: form_data.doc_password,
-            doc_phonenumber: form_data.doc_phonenumber,
-            doc_address: form_data.doc_address,
-          });
-        }else{
+    const saltRounds = 10; // จำนวนรอบในการเข้ารหัส (ค่าที่ควรจะปรับเปลี่ยนตามความต้องการ)
+
+    bcrypt
+      .hash(doc_password, saltRounds)
+      .then((hashedPassword) => {
+        let form_data = {
+          doc_username: doc_username,
+          doc_email: doc_email,
+          doc_password: hashedPassword, // เก็บรหัสผ่านที่ถูกเข้ารหัส
+          doc_phonenumber: doc_phonenumber,
+          doc_address: doc_address,
+        };
+
+        dbCon.query("INSERT INTO doc_user_table SET ?", form_data, (err, result) => {
+          if (err) {
+            req.flash("error", err);
+            res.render("psychonist/add", {
+              doc_username: form_data.doc_username,
+              doc_email: form_data.doc_email,
+              doc_password: form_data.doc_password,
+              doc_phonenumber: form_data.doc_phonenumber,
+              doc_address: form_data.doc_address,
+            });
+          } else {
             req.flash('success');
-            res.redirect('/psychonist')
-        }
-      }
-    );
+            res.redirect('/psychonist');
+          }
+        });
+      })
+      .catch((error) => {
+        console.error("Error hashing password:", error);
+        req.flash("error", "An error occurred while registering.");
+        res.render("psychonist/add", {
+          doc_username,
+          doc_email,
+          doc_password,
+          doc_phonenumber,
+          doc_address,
+        });
+      });
   }
 });
 
 module.exports = router;
+
