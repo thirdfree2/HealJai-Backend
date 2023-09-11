@@ -229,4 +229,28 @@ app.post('/adminlogin', async (req, res) => {
   }
 });
 
+
+app.post('/paymentrequest', async (req, res) => {
+  const { 	user_name	,doc_name	,appoint_time ,payment } = req.body;
+
+  try {
+
+
+    dbCon.query(
+      "INSERT INTO payment_table(user_name	,doc_name	,appoint_time ,payment) VALUES(?,?,?,?)",
+      [user_name	,doc_name	,appoint_time ,payment],
+      (err, results, fields) => {
+        if (err) {
+          console.log("Error : ", err);
+          return res.status(400).send();
+        }
+        return res.status(201).json({ message: "Success" });
+      }
+    );
+  } catch (err) {
+    console.log(err);
+    return res.status(500).send();
+  }
+});
+
 module.exports = app;

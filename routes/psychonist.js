@@ -97,6 +97,52 @@ router.post("/add", (req, res, next) => {
 });
 
 
+router.get('/appointment', (req, res) => {
+
+  res.render('psychonist/appointment',{
+    title: 'Appointment',
+  });
+});
+
+
+// Assuming you have already imported and set up your Express.js app and MySQL connection
+
+// Define a route handler for the "payment" page
+router.get('/payment', (req, res) => {
+
+  dbCon.query("SELECT * FROM payment_table ORDER BY id desc", (err, rows) => {
+    if (err) {
+      req.flash("error", err);
+      res.render("psychonist/payment", { title: 'Payment', data: [] });
+    } else {
+      // Render the "psychonist/payment" template with the retrieved data
+      res.render("psychonist/payment", { title: 'Payment', data: rows });
+    }
+  });
+
+});
+
+
+router.get('/paymentsdetails/', (req, res) => {
+  const id = req.params.id; // ดึงค่า id จากพารามิเตอร์ URL
+  const user_name = req.query.user_name;
+  const doc_name = req.query.doc_name;
+  const appoint_time = req.query.appoint_time;
+
+  // ทำสิ่งที่คุณต้องการกับข้อมูลที่ได้รับ
+  res.render('psychonist/paymentsdetails', {
+    id,
+    user_name,
+    doc_name,
+    appoint_time,
+  });
+});
+
+
+
+
+
+
 
 
 module.exports = router;
