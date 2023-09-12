@@ -9,6 +9,51 @@
 </head>
 <body class="container" style="margin-top: 50px;">
     <%- include('../layout/nav') %>
-    <h1>Hello appointment</h1>
+    <div class="card">
+        <div class="card-header">
+            <ul class="nav nav-pills w-100">
+                <li class="nav-link">
+                    <h1>
+                        Appointment
+                    </h1>
+                </li>
+            </ul>
+        </div>
+        <div class="card-body">
+            <% if(data.length) { %>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">User</th>
+                            <th scope="col">Psychonist</th>
+                            <th scope="200px">Appoint time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% for(let i=0; i < data.length; i++) {%>
+                            <tr>
+                                <th scope="row">
+                                    <%= (i+1) %>
+                                </th>
+                                <td>
+                                    <%= data[i].user_name %>
+                                </td>
+                                <td>
+                                    <%= data[i].doc_name %>
+                                </td>
+                                <td>
+                                    <%= data[i].appoint_time %>
+                                </td>
+                            </tr>
+                            <% }%>
+                    </tbody>
+                </table>
+                <% } %>
+                    <% if(!data.length) { %>
+                        <p class="text-center">No psychonist</p>
+                        <% } %>
+        </div>
+    </div>
 </body>
 </html>

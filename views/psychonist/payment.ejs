@@ -30,6 +30,7 @@
                             <th scope="col">Time Appointment</th>
                             <th scope="200px">View</th>
                             <th scope="200px">Action</th>
+                            <th scope="200px"> </th>
                         </tr>
                     </thead>
                     <tbody>
@@ -48,12 +49,17 @@
                                     <%= data[i].appoint_time %>
                                 </td>
                                 <td>
-                                    <a class="btn details-link" href="/psychonist/paymentsdetails?user_name=<%= data[i].user_name %>&doc_name=<%= data[i].doc_name %>&appoint_time=<%= data[i].appoint_time %>">Details</a>
-
-
+                                    <a class="btn details-link" href="/admin/paymentsdetails?user_name=<%= data[i].user_name %>&doc_name=<%= data[i].doc_name %>&appoint_time=<%= data[i].appoint_time %>">Details</a>
                                 </td>
                                 <td>
-                                    <a  class="btn btn-success edit">Aprove</a>
+                                    <form method="POST" action="/admin/approve-payment">
+                                        <input type="hidden" name="user_name" value="<%= data[i].user_name %>">
+                                        <input type="hidden" name="doc_name" value="<%= data[i].doc_name %>">
+                                        <input type="hidden" name="appoint_time" value="<%= data[i].appoint_time %>">
+                                        <button type="submit" class="btn btn-success">Approve</button>
+                                    </form>
+                                </td>
+                                <td>   
                                     <a  onclick="return alert('Are you sure?')"
                                         class="btn btn-success btn-danger">Reject</a>
                                 </td>
