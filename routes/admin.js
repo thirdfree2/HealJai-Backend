@@ -215,14 +215,14 @@ router.get('/paymentsdetails/', (req, res) => {
   
 
   router.post('/approve-payment', async (req, res) => {
-    const user_name = req.body.user_name; // รับค่า user_name จากข้อมูลที่ส่งมาจากหน้า HTML
+    const user_email = req.body.user_email; // รับค่า user_name จากข้อมูลที่ส่งมาจากหน้า HTML
     const doc_name = req.body.doc_name; // รับค่า doc_name จากข้อมูลที่ส่งมาจากหน้า HTML
     const appoint_time = req.body.appoint_time; // รับค่า appoint_time จากข้อมูลที่ส่งมาจากหน้า HTML
   
     try {
       dbCon.query(
-        "INSERT INTO appointment_table(user_name, doc_name, appoint_time) VALUES(?,?,?)",
-        [user_name, doc_name, appoint_time],
+        "INSERT INTO appointment_table(user_email, doc_name, appoint_time) VALUES(?,?,?)",
+        [user_email, doc_name, appoint_time],
         (err, results, fields) => {
           if (err) {
             console.log("Error : ", err);

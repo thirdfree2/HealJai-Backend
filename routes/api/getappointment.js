@@ -17,10 +17,9 @@ router.get('/get', (req, res) => {
   });
 });
 
-router.get('/get/:user_name', (req, res) => {
-  const user_name = req.params.user_name;
-
-  dbCon.query('SELECT * FROM appointment_table WHERE user_name = ?', [user_name], (error, results, fields) => {
+router.get('/get/:user_email', (req, res) => {
+  const user_email = req.params.user_email;
+  dbCon.query('SELECT * FROM appointment_table WHERE user_email = ?', [user_email], (error, results, fields) => {
     if (error) {
       console.error('Error while fetching from the database:', error);
       return res.status(500).json({ error: 'Internal server error' });
