@@ -53,7 +53,7 @@
                                 </td>
                                 <td>
                                     <form method="POST" action="/admin/approve-payment">
-                                        <input type="hidden" name="user_name" value="<%= data[i].user_name %>">
+                                        <input type="hidden" name="user_email" value="<%= data[i].user_name %>">
                                         <input type="hidden" name="doc_name" value="<%= data[i].doc_name %>">
                                         <input type="hidden" name="appoint_time" value="<%= data[i].appoint_time %>">
                                         <button type="submit" class="btn btn-success">Approve</button>

@@ -96,4 +96,33 @@ router.post('/register', async (req, res) => {
     }
   });
 
+
+  // I/flutter ( 4270): Doctor Details Page - Docname: Jordanson Mile
+  // I/flutter ( 4270): Doctor Details Page - User: AC_DC
+  // I/flutter ( 4270): Doctor Details Page - Date: 2023-09-21
+  // I/flutter ( 4270): Doctor Details Page - Time: 11:00 AM
+  // I/flutter ( 4270): Doctor Details Page - Payment: 300
+
+
+  router.post('/paymentrequest', async (req, res) => {
+    const { email, doc, payment, date, time, } = req.body;
+    // Check if the 'password' field is missing or null/empty
+    try {
+      dbCon.query(
+        "INSERT INTO payment_table(user_name, doc_name, payment_img, day_date, appoint_time) VALUES(?,?,?,?,?)",
+        [email, doc, payment, date, time,],
+        (err, results, fields) => {
+          if (err) {
+            console.log("Error : ", err);
+            return res.status(400).send();
+          }
+        return res.status(201).json({ message: 'Success'});
+        }
+      );
+    } catch (err) {
+      console.log(err);
+      return res.status(500).send();
+    }
+  });
+
 module.exports = router;
