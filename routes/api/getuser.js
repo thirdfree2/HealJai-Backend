@@ -3,6 +3,8 @@ var router = express.Router();
 let dbCon = require("../../lib/db");
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const multer = require('multer');
+const path = require('path');
 
 router.get('/get', (req, res) => {
     dbCon.query('SELECT * FROM user_table', (error, results, fields) => {
@@ -27,7 +29,8 @@ router.get('/get', (req, res) => {
       return res.status(400).json({ message: 'กรุณากรอกชื่อผู้ใช้และรหัสผ่าน' });
     }
     
-    const query = 'SELECT * FROM user_table WHERE user_email = ?';
+    const query = 'SELECT id, user_email, user_password ,user_name FROM user_table WHERE user_email = ?';
+
   
     dbCon.query(query, [user_email], async (err, results) => {
       if (err) {
@@ -41,14 +44,22 @@ router.get('/get', (req, res) => {
   
       const userData = results[0];
   
-      // ตรวจสอบรหัสผ่าน
+      
+      const payload = {
+        email: userData.user_email,
+        id: userData.id,
+        name: userData.user_name,
+        // status: userData.status, // เพิ่ม user_id ใน payload
+      };
+
+
       try {
         const isPasswordCorrect = await bcrypt.compare(user_password, userData.user_password);
         if (!isPasswordCorrect) {
           return res.status(401).json({ message: 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง' });
         }
   
-        const token = jwt.sign({ email: userData.user_email }, 'shhhhh', { expiresIn: '1h' });
+        const token = jwt.sign(payload, 'shhhhh', { expiresIn: '1h' });
         res.status(200).json({ status: true, success: "sendData", token: token });
       } catch (bcryptErr) {
         console.error('เกิดข้อผิดพลาดในการเปรียบเทียบรหัสผ่าน: ' + bcryptErr.message);
@@ -97,20 +108,34 @@ router.post('/register', async (req, res) => {
   });
 
 
+
   // I/flutter ( 4270): Doctor Details Page - Docname: Jordanson Mile
   // I/flutter ( 4270): Doctor Details Page - User: AC_DC
   // I/flutter ( 4270): Doctor Details Page - Date: 2023-09-21
   // I/flutter ( 4270): Doctor Details Page - Time: 11:00 AM
   // I/flutter ( 4270): Doctor Details Page - Payment: 300
+  const storage = multer.diskStorage({
+    destination: './upload/images',
+    filename: (req, file, cb) => {
+      const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1E9)}`;
+      const fileExtension = path.extname(file.originalname);
+      const newFilename = `${file.fieldname}_${uniqueSuffix}${fileExtension}`;
+      cb(null, newFilename);
+    }
+  });
 
+  const upload = multer({
+  storage: storage,
+})
 
-  router.post('/paymentrequest', async (req, res) => {
-    const { email, doc, payment, date, time, } = req.body;
+  router.post('/paymentrequest', upload.single('slip'), async (req, res) => {
+    const { psychonist_appointments_id, user_id} = req.body;
+    const slipFileName = req.file.filename;
     // Check if the 'password' field is missing or null/empty
     try {
       dbCon.query(
-        "INSERT INTO payment_table(user_name, doc_name, payment_img, day_date, appoint_time) VALUES(?,?,?,?,?)",
-        [email, doc, payment, date, time,],
+        "INSERT INTO payment_table(psychonist_appointments_id, user_id , slip) VALUES(?,?,?)",
+        [psychonist_appointments_id, user_id, slipFileName],
         (err, results, fields) => {
           if (err) {
             console.log("Error : ", err);
@@ -125,4 +150,5 @@ router.post('/register', async (req, res) => {
     }
   });
 
+  
 module.exports = router;

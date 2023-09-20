@@ -36,7 +36,7 @@ router.post('/registionaddmin', async (req, res) => {
   });
 
 router.get("/dashboard", (req, res, next) => {
-    dbCon.query("SELECT * FROM doc_user_table ORDER BY id desc", (err, rows) => {
+    dbCon.query("SELECT * FROM psychologist_table ORDER BY id desc", (err, rows) => {
       if (err) {
         req.flash("error", err);
         res.render("psychonist", { data: "" });
@@ -45,7 +45,6 @@ router.get("/dashboard", (req, res, next) => {
       }
     });
   });
-
 
 router.post('/login', (req, res) => {
     const { admin_user, admin_password } = req.body;
@@ -91,39 +90,39 @@ router.post('/login', (req, res) => {
 router.get("/add", (req, res, next) => {
     const message = req.flash("error");
     res.render("psychonist/add", {
-      doc_username: "",
-      doc_email: "",
-      doc_password: "",
-      doc_phonenumber: "",
-      doc_address: "",
+      psychologist_username: "",
+      psychologist_email: "",
+      psychologist_password: "",
+      psychologist_phonenumber: "",
+      psychologist_address: "",
       message: message,
     });
   });
 
 
 router.post("/add", (req, res, next) => {
-    let doc_username = req.body.doc_username;
-    let doc_email = req.body.doc_email;
-    let doc_password = req.body.doc_password;
-    let doc_phonenumber = req.body.doc_phonenumber;
-    let doc_address = req.body.doc_address;
+    let psychologist_username = req.body.psychologist_username;
+    let psychologist_email = req.body.psychologist_email;
+    let psychologist_password = req.body.psychologist_password;
+    let psychologist_phonenumber = req.body.psychologist_phonenumber;
+    let psychologist_address = req.body.psychologist_address;
     let errors = false;
   
     if (
-      !doc_username ||
-      !doc_email ||
-      !doc_password ||
-      !doc_phonenumber ||
-      !doc_address
+      !psychologist_username ||
+      !psychologist_email ||
+      !psychologist_password ||
+      !psychologist_phonenumber ||
+      !psychologist_address
     ) {
       errors = true;
       req.flash("error", "Please fill in all fields.");
       return res.render("psychonist/add", {
-        doc_username,
-        doc_email,
-        doc_password,
-        doc_phonenumber,
-        doc_address,
+        psychologist_username,
+        psychologist_email,
+        psychologist_password,
+        psychologist_phonenumber,
+        psychologist_address,
       });
     }
   
@@ -131,25 +130,25 @@ router.post("/add", (req, res, next) => {
       const saltRounds = 10; // จำนวนรอบในการเข้ารหัส (ค่าที่ควรจะปรับเปลี่ยนตามความต้องการ)
   
       bcrypt
-        .hash(doc_password, saltRounds)
+        .hash(psychologist_password, saltRounds)
         .then((hashedPassword) => {
           let form_data = {
-            doc_username: doc_username,
-            doc_email: doc_email,
-            doc_password: hashedPassword, // เก็บรหัสผ่านที่ถูกเข้ารหัส
-            doc_phonenumber: doc_phonenumber,
-            doc_address: doc_address,
+            psychologist_username: psychologist_username,
+            psychologist_email: psychologist_email,
+            psychologist_password: hashedPassword, // เก็บรหัสผ่านที่ถูกเข้ารหัส
+            psychologist_phonenumber: psychologist_phonenumber,
+            psychologist_address: psychologist_address,
           };
   
-          dbCon.query("INSERT INTO doc_user_table SET ?", form_data, (err, result) => {
+          dbCon.query("INSERT INTO psychologist_table SET ?", form_data, (err, result) => {
             if (err) {
               req.flash("error", err);
               res.render("psychonist/add", {
-                doc_username: form_data.doc_username,
-                doc_email: form_data.doc_email,
-                doc_password: form_data.doc_password,
-                doc_phonenumber: form_data.doc_phonenumber,
-                doc_address: form_data.doc_address,
+                psychologist_username: form_data.psychologist_username,
+                psychologist_email: form_data.psychologist_email,
+                psychologist_password: form_data.psychologist_password,
+                psychologist_phonenumber: form_data.psychologist_phonenumber,
+                psychologist_address: form_data.psychologist_address,
               });
             } else {
               req.flash('success');
@@ -161,18 +160,18 @@ router.post("/add", (req, res, next) => {
           console.error("Error hashing password:", error);
           req.flash("error", "An error occurred while registering.");
           res.render("psychonist/add", {
-            doc_username,
-            doc_email,
-            doc_password,
-            doc_phonenumber,
-            doc_address,
+            psychologist_username,
+            psychologist_email,
+            psychologist_password,
+            psychologist_phonenumber,
+            psychologist_address,
           });
         });
     }
   });
 
-router.get('/appointment', (req, res) => {
 
+router.get('/appointment', (req, res) => {
     dbCon.query("SELECT * FROM appointment_table ORDER BY id desc", (err, rows) => {
       if (err) {
         req.flash("error", err);
@@ -213,16 +212,50 @@ router.get('/paymentsdetails/', (req, res) => {
     });
   });
   
+  // 11
+  // Jordanson Mile
+  // 11.00-12.00
+  // AC_DC
+  // In Coming
+  // 2023-09-19
+
+  // router.post('/approve-payment', async (req, res) => {
+  //   const psychonist_appointments_id = req.body.psychonist_appointments_id; // รับค่า user_name จากข้อมูลที่ส่งมาจากหน้า HTML
+  //   const status = req.body.status; // รับค่า appoint_time จากข้อมูลที่ส่งมาจากหน้า HTML
+  
+  //   try {
+  //     dbCon.query(
+  //       "INSERT INTO appointment_table(psychonist_appointments_id,status) VALUES(?,?)",
+  //       [psychonist_appointments_id,status],
+  //       (err, results, fields) => {
+  //         if (err) {
+  //           console.log("Error : ", err);
+  //           // ในกรณีที่มีข้อผิดพลาดในการเชื่อมต่อฐานข้อมูลหรือการส่งคำสั่ง SQL
+  //           // คุณควรส่งคำตอบกลับที่ระบุสถานะข้อผิดพลาด
+  //           return res.status(500).json({ message: "Internal Server Error" });
+  //         }
+  //         // การเสร็จสิ้นโดยไม่มีข้อผิดพลาด
+  //         res.redirect('/admin/dashboard');
+  //       }
+  //     );
+  //   } catch (err) {
+  //     console.log(err);
+  //     // ในกรณีที่เกิดข้อผิดพลาดระหว่างการทำงาน
+  //     // คุณควรส่งคำตอบกลับที่ระบุสถานะข้อผิดพลาดเช่นกัน
+  //     return res.status(500).json({ message: "Internal Server Error" });
+  //   }
+  // });
+
 
   router.post('/approve-payment', async (req, res) => {
-    const user_email = req.body.user_email; // รับค่า user_name จากข้อมูลที่ส่งมาจากหน้า HTML
-    const doc_name = req.body.doc_name; // รับค่า doc_name จากข้อมูลที่ส่งมาจากหน้า HTML
-    const appoint_time = req.body.appoint_time; // รับค่า appoint_time จากข้อมูลที่ส่งมาจากหน้า HTML
-  
+    const psychonist_appointments_id = req.body.psychonist_appointments_id; // รับค่า psychonist_appointments_id จากข้อมูลที่ส่งมาจากหน้า HTML
+    const user_id = req.body.user_id; // รับค่า user_id จากข้อมูลที่ส่งมาจากหน้า HTML
+    const status = req.body.status;
+    
     try {
       dbCon.query(
-        "INSERT INTO appointment_table(user_email, doc_name, appoint_time) VALUES(?,?,?)",
-        [user_email, doc_name, appoint_time],
+        "UPDATE psychologist_appointments SET status = -1, user_id = ? WHERE id = ?",
+        [user_id, psychonist_appointments_id],
         (err, results, fields) => {
           if (err) {
             console.log("Error : ", err);
@@ -230,8 +263,23 @@ router.get('/paymentsdetails/', (req, res) => {
             // คุณควรส่งคำตอบกลับที่ระบุสถานะข้อผิดพลาด
             return res.status(500).json({ message: "Internal Server Error" });
           }
-          // การเสร็จสิ้นโดยไม่มีข้อผิดพลาด
-          res.redirect('/admin/dashboard');
+          
+          // เพิ่มข้อมูลลงในตาราง "appointment_table"
+          dbCon.query(
+            "INSERT INTO appointment_table (psychonist_appointments_id, status) VALUES (?, ?)",
+            [psychonist_appointments_id, status],
+            (insertErr, insertResults, insertFields) => {
+              if (insertErr) {
+                console.log("Error inserting data into appointment_table: ", insertErr);
+                // ในกรณีที่มีข้อผิดพลาดในการเชื่อมต่อฐานข้อมูลหรือการส่งคำสั่ง SQL
+                // คุณควรส่งคำตอบกลับที่ระบุสถานะข้อผิดพลาด
+                return res.status(500).json({ message: "Internal Server Error" });
+              }
+              
+              // การเสร็จสิ้นโดยไม่มีข้อผิดพลาด
+              res.redirect('/admin/dashboard');
+            }
+          );
         }
       );
     } catch (err) {
@@ -241,6 +289,12 @@ router.get('/paymentsdetails/', (req, res) => {
       return res.status(500).json({ message: "Internal Server Error" });
     }
   });
+  
+  
+  
+
+
+  
   
 
 module.exports = router;

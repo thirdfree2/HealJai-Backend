@@ -34,8 +34,8 @@ app.use(flash());
 
 app.use('/', indexRouter);
 app.use('/admin', adminRouter);
-app.use('/getpsychonist', getpsychonistRouter);
-app.use('/getappointment', getappointmentRouter);
+app.use('/psychonist', getpsychonistRouter);
+app.use('/appointment', getappointmentRouter);
 app.use('/user', userRouter);
 
 

@@ -25,10 +25,10 @@
                     <thead>
                         <tr>
                             <th scope="col">#</th>
-                            <th scope="col">Username</th>
-                            <th scope="col">Psychonistname</th>
-                            <th scope="col">Time Appointment</th>
-                            <th scope="200px">View</th>
+                            <th scope="col">Username ID</th>
+                            <th scope="col">Psychologist ID</th>
+                            <th scope="col">Slip</th>
+                            <th scope="200px"> </th>
                             <th scope="200px">Action</th>
                             <th scope="200px"> </th>
                         </tr>
@@ -40,22 +40,22 @@
                                     <%= (i+1) %>
                                 </th>
                                 <td>
-                                    <%= data[i].user_name %>
+                                    <%= data[i].psychonist_appointments_id %>
                                 </td>
                                 <td>
-                                    <%= data[i].doc_name %>
+                                    <%= data[i].user_id %>
                                 </td>
                                 <td>
-                                    <%= data[i].appoint_time %>
+                                    <%= data[i].slip %>
                                 </td>
                                 <td>
-                                    <a class="btn details-link" href="/admin/paymentsdetails?user_name=<%= data[i].user_name %>&doc_name=<%= data[i].doc_name %>&appoint_time=<%= data[i].appoint_time %>">Details</a>
+                                    <%= data[i].postingdate %>
                                 </td>
                                 <td>
                                     <form method="POST" action="/admin/approve-payment">
-                                        <input type="hidden" name="user_email" value="<%= data[i].user_name %>">
-                                        <input type="hidden" name="doc_name" value="<%= data[i].doc_name %>">
-                                        <input type="hidden" name="appoint_time" value="<%= data[i].appoint_time %>">
+                                        <input type="hidden" name="psychonist_appointments_id" value="<%= data[i].psychonist_appointments_id %>">
+                                        <input type="hidden" name="user_id" value="<%= data[i].user_id %>">
+                                        <input type="hidden" name="status" value="In Coming">
                                         <button type="submit" class="btn btn-success">Approve</button>
                                     </form>
                                 </td>

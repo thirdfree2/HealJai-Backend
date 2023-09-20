@@ -24,26 +24,22 @@
                 <table class="table">
                     <thead>
                         <tr>
-                            <th scope="col">#</th>
-                            <th scope="col">User</th>
-                            <th scope="col">Psychonist</th>
-                            <th scope="200px">Appoint time</th>
+                            <th scope="col">Appointment ID</th>
+                            <th scope="col">Status</th>
+                            <th scope="col">Psychologist ID date</th>
                         </tr>
                     </thead>
                     <tbody>
                         <% for(let i=0; i < data.length; i++) {%>
                             <tr>
                                 <th scope="row">
-                                    <%= (i+1) %>
+                                    #<%= (i+1) %>
                                 </th>
                                 <td>
-                                    <%= data[i].user_name %>
+                                    <%= data[i].status %>
                                 </td>
                                 <td>
-                                    <%= data[i].doc_name %>
-                                </td>
-                                <td>
-                                    <%= data[i].appoint_time %>
+                                    <%= data[i].psychonist_appointments_id %>
                                 </td>
                             </tr>
                             <% }%>
