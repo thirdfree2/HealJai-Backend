@@ -34,7 +34,6 @@ router.get('/get/:id', (req, res) => {
 });
 
 
-
 router.get('/:doc_name',(req,res) => {
   const doc_name = req.params.doc_name;
   dbCon.query('SELECT * FROM appointment_table WHERE doc_name = ?', [doc_name], (error, results, fields) => {
@@ -51,7 +50,6 @@ router.get('/:doc_name',(req,res) => {
   });
 })
 
-
 router.get('/appoint/:psycholonist_id', (req, res) => {
   const psychologist_id = req.params.psycholonist_id;
   dbCon.query('SELECT * FROM psychologist_appointments WHERE psycholonist_id = ?', [psychologist_id], (error, results, fields) => {
@@ -67,7 +65,6 @@ router.get('/appoint/:psycholonist_id', (req, res) => {
     return res.json({ error: false, data: results, message: 'Success' });
   });
 });
-
 
 
 module.exports = router;

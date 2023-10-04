@@ -22,7 +22,7 @@ router.get('/get', (req, res) => {
   });
   
 
-  router.post('/login', (req, res) => {
+router.post('/login', (req, res) => {
     const { user_email, user_password } = req.body;
   
     if (!user_email || !user_password) {
@@ -68,7 +68,7 @@ router.get('/get', (req, res) => {
     });
   });
 
-
+  
 router.post('/auth', (req, res, next) => {
   try {
     const token = req.headers.authorization.split(' ')[1];
@@ -79,7 +79,7 @@ router.post('/auth', (req, res, next) => {
     console.log(token)
     res.json({ status: 'error', msg: error.message , token});
   }
-});
+  });
 
 
 router.post('/register', async (req, res) => {
@@ -108,12 +108,7 @@ router.post('/register', async (req, res) => {
   });
 
 
-
-  // I/flutter ( 4270): Doctor Details Page - Docname: Jordanson Mile
-  // I/flutter ( 4270): Doctor Details Page - User: AC_DC
-  // I/flutter ( 4270): Doctor Details Page - Date: 2023-09-21
-  // I/flutter ( 4270): Doctor Details Page - Time: 11:00 AM
-  // I/flutter ( 4270): Doctor Details Page - Payment: 300
+  
   const storage = multer.diskStorage({
     destination: './upload/images',
     filename: (req, file, cb) => {
@@ -123,10 +118,9 @@ router.post('/register', async (req, res) => {
       cb(null, newFilename);
     }
   });
-
   const upload = multer({
   storage: storage,
-})
+  });
 
   router.post('/paymentrequest', upload.single('slip'), async (req, res) => {
     const { psychonist_appointments_id, user_id} = req.body;
