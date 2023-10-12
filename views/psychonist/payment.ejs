@@ -25,10 +25,10 @@
                     <thead>
                         <tr>
                             <th scope="col">#</th>
-                            <th scope="col">Username ID</th>
-                            <th scope="col">Psychologist ID</th>
+                            <th scope="col">Appointment ID</th>
+                            <th scope="col">Patient ID</th>
                             <th scope="col">Slip</th>
-                            <th scope="200px"> </th>
+                            <th scope="200px">TimeStamps</th>
                             <th scope="200px">Action</th>
                             <th scope="200px"> </th>
                         </tr>
@@ -40,10 +40,10 @@
                                     <%= (i+1) %>
                                 </th>
                                 <td>
-                                    <%= data[i].psychonist_appointments_id %>
+                                    <%= data[i].psychologist_appointments_id  %>
                                 </td>
                                 <td>
-                                    <%= data[i].user_id %>
+                                    <%= data[i].patient_id %>
                                 </td>
                                 <td>
                                     <%= data[i].slip %>
@@ -53,9 +53,9 @@
                                 </td>
                                 <td>
                                     <form method="POST" action="/admin/approve-payment">
-                                        <input type="hidden" name="psychonist_appointments_id" value="<%= data[i].psychonist_appointments_id %>">
-                                        <input type="hidden" name="user_id" value="<%= data[i].user_id %>">
-                                        <input type="hidden" name="status" value="In Coming">
+                                        <input type="hidden" name="psychologist_appointments_id" value="<%= data[i].psychologist_appointments_id %>">
+                                        <input type="hidden" name="patient_id" value="<%= data[i].patient_id %>">
+                                        <input type="hidden" name="status" value="Incoming">
                                         <button type="submit" class="btn btn-success">Approve</button>
                                     </form>
                                 </td>

@@ -7,7 +7,8 @@ const jwt = require('jsonwebtoken');
 
 
 router.get("/get", (req, res) => {
-  dbCon.query("SELECT * FROM psychologist_table", (error, results, fields) => {
+  // เปลี่ยน query SQL เพื่อรวมข้อมูลจากตารางที่เกี่ยวข้อง
+  dbCon.query("SELECT * FROM psychologist_details INNER JOIN user_table ON psychologist_details.psychologist_id = user_table.id WHERE user_table.role_id_fk = 2", (error, results, fields) => {
     if (error) {
       console.error(
         "Error while fetching psychologists from the database:",
@@ -23,6 +24,7 @@ router.get("/get", (req, res) => {
     return res.json({ error: false, data: results, message: "Success" });
   });
 });
+
 
 
 router.get("/getappointments/:doc_name", (req, res) => {
@@ -87,7 +89,7 @@ router.get("/getappointments/:doc_name", (req, res) => {
 
 router.get("/calendar/:psychologist_id", (req, res) => {
   const psychologist_id = req.params.psychologist_id;
-  dbCon.query("SELECT * FROM psychologist_appointments WHERE psycholonist_id = ?",[psychologist_id], (error, results, fields) => {
+  dbCon.query("SELECT * FROM psychologist_appointment WHERE psychologist_id  = ?",[psychologist_id], (error, results, fields) => {
     if (error) {
       console.error(
         "Error while fetching psychologists from the database:",
@@ -104,52 +106,6 @@ router.get("/calendar/:psychologist_id", (req, res) => {
   });
 });
 
-
-router.post('/login', (req, res) => {
-  const { psychologist_email, psychologist_password } = req.body;
-
-  if (!psychologist_email || !psychologist_password) {
-    return res.status(400).json({ message: 'กรุณากรอกชื่อผู้ใช้และรหัสผ่าน' });
-  }
-  
-  const query = 'SELECT id, psychologist_email, psychologist_password ,psychologist_username FROM psychologist_table WHERE psychologist_email = ?';
-
-
-  dbCon.query(query, [psychologist_email], async (err, results) => {
-    if (err) {
-      console.error('เกิดข้อผิดพลาดในการค้นหาข้อมูล admin: ' + err.message);
-      return res.status(500).json({ message: 'มีข้อผิดพลาดในการล็อกอิน' });
-    }
-
-    if (results.length === 0) {
-      return res.status(401).json({ message: 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง' });
-    }
-
-    const userData = results[0];
-
-    
-    const payload = {
-      email: userData.psychologist_email,
-      id: userData.id,
-      name: userData.psychologist_username,
-      // status: userData.status, // เพิ่ม user_id ใน payload
-    };
-
-
-    try {
-      const isPasswordCorrect = await bcrypt.compare(psychologist_password, userData.psychologist_password);
-      if (!isPasswordCorrect) {
-        return res.status(401).json({ message: 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง' });
-      }
-
-      const token = jwt.sign(payload, 'shhhhh', { expiresIn: '1h' });
-      res.status(200).json({ status: true, success: "sendData", token: token });
-    } catch (bcryptErr) {
-      console.error('เกิดข้อผิดพลาดในการเปรียบเทียบรหัสผ่าน: ' + bcryptErr.message);
-      return res.status(500).json({ message: 'มีข้อผิดพลาดในการล็อกอิน' });
-    }
-  });
-});
 
 
 

@@ -187,7 +187,6 @@ router.post("/add", async (req, res, next) => {
 });
 
 
-
 router.get('/appointment', (req, res) => {
   dbCon.query("SELECT * FROM appointment_table ORDER BY id desc", (err, rows) => {
     if (err) {
@@ -199,7 +198,6 @@ router.get('/appointment', (req, res) => {
     }
   });
 });
-
 
 router.get('/payment', (req, res) => {
   dbCon.query("SELECT * FROM payment_table ORDER BY id desc", (err, rows) => {
@@ -213,6 +211,7 @@ router.get('/payment', (req, res) => {
   });
 
 });
+
 
 
 router.get('/paymentsdetails/', (req, res) => {
@@ -231,13 +230,13 @@ router.get('/paymentsdetails/', (req, res) => {
 
 
 router.post('/approve-payment', async (req, res) => {
-  const psychonist_appointments_id = req.body.psychonist_appointments_id; // รับค่า psychonist_appointments_id จากข้อมูลที่ส่งมาจากหน้า HTML
-  const user_id = req.body.user_id; // รับค่า user_id จากข้อมูลที่ส่งมาจากหน้า HTML
+  const psychonist_appointments_id = req.body.psychologist_appointments_id; // รับค่า psychonist_appointments_id จากข้อมูลที่ส่งมาจากหน้า HTML
+  const user_id = req.body.patient_id; // รับค่า user_id จากข้อมูลที่ส่งมาจากหน้า HTML
   const status = req.body.status;
 
   try {
     dbCon.query(
-      "UPDATE psychologist_appointments SET status = -1, user_id = ? WHERE id = ?",
+      "UPDATE psychologist_appointment SET status = 1, user_id = ? WHERE id = ?",
       [user_id, psychonist_appointments_id],
       (err, results, fields) => {
         if (err) {
@@ -249,7 +248,7 @@ router.post('/approve-payment', async (req, res) => {
 
         // เพิ่มข้อมูลลงในตาราง "appointment_table"
         dbCon.query(
-          "INSERT INTO appointment_table (psychonist_appointments_id, status) VALUES (?, ?)",
+          "INSERT INTO appointment_table (psychologist_appointment_id , text_status) VALUES (?, ?)",
           [psychonist_appointments_id, status],
           (insertErr, insertResults, insertFields) => {
             if (insertErr) {

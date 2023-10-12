@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Socket.io Test</title>
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    var socket = io();
+
+    // ส่งข้อความไปยังเซิร์ฟเวอร์เมื่อกดปุ่ม
+    function sendMessage() {
+      var message = document.getElementById("messageInput").value;
+      socket.emit("chat message", message);
+    }
+
+    // รับข้อความจากเซิร์ฟเวอร์และแสดงบนหน้าเว็บ
+    socket.on("chat message", (msg) => {
+      var messagesDiv = document.getElementById("messages");
+      messagesDiv.innerHTML += "<p>" + msg + "</p>";
+    });
+  </script>
+</head>
+<body>
+  <h1>Socket.io Test</h1>
+  <input type="text" id="messageInput" placeholder="Enter your message">
+  <button onclick="sendMessage()">Send</button>
+  <div id="messages"></div>
+</body>
+</html>
