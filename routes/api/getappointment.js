@@ -4,14 +4,13 @@ let dbCon = require("../../lib/db");
 
 router.get("/get", (req, res) => {
   dbCon.query(
-    `
-    SELECT appointment_table.*, psychologist_appointment.*, user_table.*
-    FROM appointment_table
-    INNER JOIN psychologist_appointment
-    ON appointment_table.psychologist_appointment_id = psychologist_appointment.id
-    INNER JOIN user_table
-    ON psychologist_appointment.psychologist_id = user_table.id
-  `,
+    `SELECT appointment_table.*, psychologist_appointment.*, app_users.*
+     FROM appointment_table
+     INNER JOIN psychologist_appointment
+     ON appointment_table.psychologist_appointment_id = psychologist_appointment.id
+     INNER JOIN app_users
+     ON psychologist_appointment.psychologist_id = app_users.UserID
+     `,
     (error, results, fields) => {
       if (error) {
         console.error("Error while fetching from the database:", error);
@@ -31,13 +30,13 @@ router.get("/get/:user_id", (req, res) => {
   const userId = req.params.user_id;
   dbCon.query(
     `
-    SELECT appointment_table.*, psychologist_appointment.*, user_table.*
-    FROM appointment_table
-    INNER JOIN psychologist_appointment
-    ON appointment_table.psychologist_appointment_id = psychologist_appointment.id
-    INNER JOIN user_table
-    ON psychologist_appointment.psychologist_id = user_table.id
-    WHERE psychologist_appointment.user_id = ?
+     SELECT appointment_table.*, psychologist_appointment.*, app_users.*
+     FROM appointment_table
+     INNER JOIN psychologist_appointment
+     ON appointment_table.psychologist_appointment_id = psychologist_appointment.id
+     INNER JOIN app_users
+     ON psychologist_appointment.psychologist_id = app_users.UserID
+     WHERE psychologist_appointment.user_id = ?
     `,
     [userId],
     (error, results, fields) => {
@@ -58,9 +57,6 @@ router.get("/get/:user_id", (req, res) => {
     }
   );
 });
-
-
-
 
 router.get("/psychologist/:user_id", (req, res) => {
   const userId = req.params.user_id;
