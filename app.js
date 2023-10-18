@@ -7,6 +7,7 @@ const flash = require('express-flash');
 const session = require('express-session');
 const socketio = require('socket.io');
 
+
 const indexRouter = require('./routes/index');
 const adminRouter = require('./routes/admin');
 const getpsychonistRouter = require('./routes/api/getpsychonist');
@@ -22,6 +23,7 @@ const io = require('socket.io')(httpServer, {
 },
 });
 
+app.use(express.static('public'));
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 

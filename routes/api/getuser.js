@@ -6,19 +6,17 @@ const jwt = require("jsonwebtoken");
 const multer = require("multer");
 const path = require("path");
 
-
-
 router.post("/login", (req, res) => {
-  const { user_email, user_password } = req.body;
+  const { Email, Password } = req.body;
 
-  if (!user_email || !user_password) {
+  if (!Email || !Password) {
     return res.status(400).json({ message: "กรุณากรอกชื่อผู้ใช้และรหัสผ่าน" });
   }
 
-  const query =
-    "SELECT id, user_email, user_password, user_name, role_id_fk FROM user_table WHERE user_email = ?";
+  const query1 =
+    "SELECT UserID, Email, Password, UserName FROM app_users WHERE Email = ?";
 
-  dbCon.query(query, [user_email], async (err, results) => {
+  dbCon.query(query1, [Email], async (err, results) => {
     if (err) {
       console.error("เกิดข้อผิดพลาดในการค้นหาข้อมูลผู้ใช้: " + err.message);
       return res.status(500).json({ message: "มีข้อผิดพลาดในการล็อกอิน" });
@@ -34,8 +32,8 @@ router.post("/login", (req, res) => {
 
     try {
       const isPasswordCorrect = await bcrypt.compare(
-        user_password,
-        userData.user_password
+        Password,
+        userData.Password
       );
       if (!isPasswordCorrect) {
         return res
@@ -43,17 +41,27 @@ router.post("/login", (req, res) => {
           .json({ message: "ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง" });
       }
 
-      const payload = {
-        email: userData.user_email,
-        id: userData.id,
-        name: userData.user_name,
-        role_id: userData.role_id_fk, // เพิ่มค่า role_id ใน payload
-      };
+      // เรียกดู UserGroupID จาก app_user_roles
+      const query2 = "SELECT UserGroupID FROM app_user_roles WHERE UserID = ?";
 
-      const token = jwt.sign(payload, "shhhhh", { expiresIn: "1h" });
-      res
-        .status(200)
-        .json({ status: true, token: token });
+      dbCon.query(query2, [userData.UserID], (err, roleResults) => {
+        if (err) {
+          console.error("เกิดข้อผิดพลาดในการค้นหา UserGroupID: " + err.message);
+          return res.status(500).json({ message: "มีข้อผิดพลาดในการล็อกอิน" });
+        }
+
+        const roleData = roleResults[0];
+
+        const payload = {
+          email: userData.Email,
+          id: userData.UserID,
+          name: userData.UserName,
+          role_id: roleData ? roleData.UserGroupID : null, // ตรวจสอบว่ามี roleData หรือไม่
+        };
+
+        const token = jwt.sign(payload, "shhhhh", { expiresIn: "1h" });
+        res.status(200).json({ status: true, token: token });
+      });
     } catch (bcryptErr) {
       console.error(
         "เกิดข้อผิดพลาดในการเปรียบเทียบรหัสผ่าน: " + bcryptErr.message
@@ -63,41 +71,27 @@ router.post("/login", (req, res) => {
   });
 });
 
-
 router.post("/register", async (req, res) => {
-  const {
-    user_name,
-    user_password,
-    first_name,
-    last_name,
-    user_email,
-    birthday,
-  } = req.body;
-  if (!user_password) {
+  const { UserName, Password, FirstName, LastName, Email, BirthDay, Tel } =
+    req.body;
+  if (!Password) {
     return res.status(400).json({ message: "Password is required" });
   }
-  const role_id_fk = "1";
   try {
-    const hashedPassword = await bcrypt.hash(user_password, 10);
+    const hashedPassword = await bcrypt.hash(Password, 10);
     dbCon.query(
-      "INSERT INTO user_table(user_password, user_email,user_name,first_name,last_name,role_id_fk) VALUES(?,?,?,?,?,?)",
-      [
-        hashedPassword,
-        user_email,
-        user_name,
-        first_name,
-        last_name,
-        role_id_fk,
-      ],
+      "INSERT INTO app_users(Password, Email,UserName,FirstName,LastName,BirthDay,Tel) VALUES(?,?,?,?,?,?,?)",
+      [hashedPassword, Email, UserName, FirstName, LastName, BirthDay, Tel],
       (err, results, fields) => {
         if (err) {
           console.log("Error : ", err);
           return res.status(400).send();
         }
+
         const userId = results.insertId;
         dbCon.query(
-          "INSERT INTO patient_details(patient_id_fk, birthday) VALUES(?,?)",
-          [userId, birthday],
+          "INSERT INTO app_user_roles(UserID, UserGroupID) VALUES(?,3)",
+          [userId, BirthDay],
           (err, results, fields) => {
             if (err) {
               console.log("Error : ", err);
@@ -114,23 +108,8 @@ router.post("/register", async (req, res) => {
   }
 });
 
-
-
-router.post("/auth", (req, res, next) => {
-  try {
-    const token = req.headers.authorization.split(" ")[1];
-    console.log(token);
-    var decoded = jwt.verify(token, "shhhhh");
-    res.json({ status: "ok", decoded });
-  } catch (error) {
-    console.log(token);
-    res.json({ status: "error", msg: error.message, token });
-  }
-});
-
-
 const storage = multer.diskStorage({
-  destination: "./upload/images",
+  destination: "upload/slip",
   filename: (req, file, cb) => {
     const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
     const fileExtension = path.extname(file.originalname);
@@ -145,7 +124,7 @@ const upload = multer({
 
 router.post("/paymentrequest", upload.single("slip"), async (req, res) => {
   const { psychonist_appointments_id, user_id } = req.body;
-  const slipFileName = req.file.filename;
+  const slipFileName = req.file.path;
   try {
     dbCon.query(
       "INSERT INTO payment_table(psychologist_appointments_id , patient_id  , slip) VALUES(?,?,?)",
@@ -163,6 +142,5 @@ router.post("/paymentrequest", upload.single("slip"), async (req, res) => {
     return res.status(500).send();
   }
 });
-
 
 module.exports = router;

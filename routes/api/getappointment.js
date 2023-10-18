@@ -60,6 +60,8 @@ router.get("/get/:user_id", (req, res) => {
 });
 
 
+
+
 router.get("/psychologist/:user_id", (req, res) => {
   const userId = req.params.user_id;
   dbCon.query(
@@ -85,7 +87,6 @@ router.get("/psychologist/:user_id", (req, res) => {
     }
   );
 });
-
 
 router.get("/:doc_name", (req, res) => {
   const doc_name = req.params.doc_name;

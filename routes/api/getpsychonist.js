@@ -7,8 +7,7 @@ const jwt = require('jsonwebtoken');
 
 
 router.get("/get", (req, res) => {
-  // เปลี่ยน query SQL เพื่อรวมข้อมูลจากตารางที่เกี่ยวข้อง
-  dbCon.query("SELECT * FROM psychologist_details INNER JOIN user_table ON psychologist_details.psychologist_id = user_table.id WHERE user_table.role_id_fk = 2", (error, results, fields) => {
+  dbCon.query("SELECT * FROM app_user_roles INNER JOIN app_users ON app_user_roles.UserID = app_users.UserID WHERE app_user_roles.UserGroupID = 2", (error, results, fields) => {
     if (error) {
       console.error(
         "Error while fetching psychologists from the database:",
