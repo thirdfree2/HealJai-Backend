@@ -24,8 +24,6 @@ router.get("/get", (req, res) => {
   });
 });
 
-
-
 router.get("/getappointments/:doc_name", (req, res) => {
   const doc_name = req.params.doc_name;
   dbCon.query(
