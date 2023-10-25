@@ -8,8 +8,10 @@ const session = require('express-session');
 const socketio = require('socket.io');
 
 
+
 const indexRouter = require('./routes/index');
 const adminRouter = require('./routes/admin');
+const refundRouter = require('./routes/api/refund');
 const getpsychonistRouter = require('./routes/api/getpsychonist');
 const getappointmentRouter = require('./routes/api/getappointment');
 const userRouter = require('./routes/api/getuser');
@@ -22,6 +24,8 @@ const io = require('socket.io')(httpServer, {
    origin: "http://localhost:3000", //specific origin you want to give access to,
 },
 });
+
+// .join(__dirname, '/public')
 
 app.use(express.static('public'));
 app.set('views', path.join(__dirname, 'views'));
@@ -48,6 +52,7 @@ app.use('/', indexRouter);
 app.use('/admin', adminRouter);
 app.use('/psychologist', getpsychonistRouter);
 app.use('/appointment', getappointmentRouter);
+app.use('/admin/refund', refundRouter);
 app.use('/user', userRouter);
 
 

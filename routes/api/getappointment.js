@@ -62,7 +62,13 @@ router.get("/psychologist/:user_id", (req, res) => {
   const userId = req.params.user_id;
   dbCon.query(
     `
-    SELECT * FROM psychologist_appointment WHERE psychologist_id = ? AND status = 1
+    SELECT appointment_table.*, psychologist_appointment.*, app_users.*
+     FROM appointment_table
+     INNER JOIN psychologist_appointment
+     ON appointment_table.psychologist_appointment_id = psychologist_appointment.id
+     INNER JOIN app_users
+     ON psychologist_appointment.psychologist_id = app_users.UserID
+     WHERE app_users.UserID = ?
     `,
     [userId],
     (error, results, fields) => {
@@ -83,6 +89,7 @@ router.get("/psychologist/:user_id", (req, res) => {
     }
   );
 });
+
 
 router.get("/:doc_name", (req, res) => {
   const doc_name = req.params.doc_name;

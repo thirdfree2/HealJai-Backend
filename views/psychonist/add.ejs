@@ -1,71 +1,51 @@
 <!DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Psyconist</title>
-        <link
-            href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
-            rel="stylesheet"
-            integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
-            crossorigin="anonymous">
-    </head>
-    <body class="container" style="margin-top: 50px;">
-        <%- include('../layout/nav') %>
-        <div class="card">
-            <div class="card-header">
-                Add Psychonist
-            </div>
-            <div class="card-body">
-                <form action="/admin/add" method="post">
-                    <div class="form-group">
-                        <label>Name:</label>
-                        <input type="text" class="form-control"
-                            name="user_name" value="<%= UserName %>"
-                            autocomplete="off">
-                    </div>
-                    <div class="form-group">
-                        <label>First Name:</label>
-                        <input type="text" class="form-control"
-                            name="first_name" value="<%= FirstName %>"
-                            autocomplete="off">
-                    </div>
-                    <div class="form-group">
-                        <label>Last Name:</label>
-                        <input type="text" class="form-control"
-                            name="last_name" value="<%= LastName %>"
-                            autocomplete="off">
-                    </div>
-                    <div class="form-group">
-                        <label>Email:</label>
-                        <input type="text" class="form-control"
-                            name="user_email" value="<%= Email %>"
-                            autocomplete="off">
-                    </div>
-                    <div class="form-group">
-                        <label>Password:</label>
-                        <input type="password" class="form-control"
-                            name="user_password" value="<%= Password %>"
-                            autocomplete="off">
-                    </div>
-                    <div class="form-group">
-                        <label>TEL:</label>
-                        <input type="text" class="form-control"
-                            name="phoneTEL" value="<%= Tel %>"
-                            autocomplete="off">
-                    </div>
-                    <div class="form-group">
-                        <label>Address:</label>
-                        <input type="text" class="form-control"
-                            name="address" value="<%= Address %>"
-                            autocomplete="off">
-                    </div>
-                    <div class="form-group">
-                        <input type="submit" class="btn btn-info"
-                            value="Add">
-                    </div>
-                </form>
-            </div>
-        </div>
-    </body>
+<html>
+<head>
+  <title>Add Psychologist</title>
+  <!-- เพิ่ม CSS สำหรับสไตล์หน้าเว็บ -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+  <div class="container mt-5 border p-3">
+    <div class="d-flex justify-content-between mt-4">
+        <h1>Add Psychologist</h1>
+        <a href="/admin/dashboard" class="btn btn-secondary h-50">กลับ</a>
+    </div>
+    <form class="mt-4" method="POST" action="/admin/add">
+      <div class="form-group">
+        <label for="UserName">UserName:</label>
+        <input type="text" class="form-control" name="UserName" required>
+      </div>
+      <div class="form-group">
+        <label for="FirstName">First Name:</label>
+        <input type="text" class="form-control" name="FirstName" required>
+      </div>
+      <div class="form-group">
+        <label for="LastName">Last Name:</label>
+        <input type="text" class="form-control" name="LastName" required>
+      </div>
+      <div class="form-group">
+        <label for="Email">Email:</label>
+        <input type="email" class="form-control" name="Email" required>
+      </div>
+      <div class="form-group">
+        <label for="Password">Password:</label>
+        <input type="password" class="form-control" name="Password" required>
+      </div>
+      <div class="form-group">
+        <label for="Tel">Telephone:</label>
+        <input type="text" class="form-control" name="Tel" required>
+      </div>
+      <div class="form-group">
+        <label for="Address">Address:</label>
+        <input type="text" class="form-control" name="Address" required>
+      </div>
+      <button type="submit" class="btn btn-primary">Add Psychologist</button>
+    </form>
+  </div>
+
+  <!-- เพิ่มสคริปต์ Bootstrap และ jQuery (ถ้าจำเป็น) -->
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.min.js"></script>
+</body>
 </html>

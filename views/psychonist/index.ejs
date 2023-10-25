@@ -46,9 +46,7 @@
                                     <%= data[i].Email %>
                                 </td>
                                 <td>
-                                    <a href="../books/edit/<%= data[i].id %>" class="btn btn-success edit">edit</a>
-                                    <a href="../books/delete/<%= data[i].id %>" onclick="return alert('Are you sure?')"
-                                        class="btn btn-success btn-danger">delete</a>
+                                    <a href="/admin/details/<%= data[i].UserID%>">Details</a>
                                 </td>
                             </tr>
                             <% }%>

@@ -2,6 +2,10 @@ var express = require("express");
 var router = express.Router();
 let dbCon = require("../lib/db");
 const bcrypt = require("bcrypt");
+const path = require('path');
+const multer = require("multer");
+
+
 
 router.get("/", function (req, res, next) {
   res.render("index", { title: "Express" });
@@ -161,32 +165,20 @@ router.post("/login", (req, res) => {
 });
 
 router.get("/add", (req, res, next) => {
-  const message = req.flash("error");
-  res.render("psychonist/add", {
-    UserName: "",
-    Email: "",
-    FirstName: "",
-    LastName: "",
-    Password: "",
-    Tel: "",
-    Address: "",
-    message: message,
-  });
+  res.render("psychonist/add", { });
 });
 
 router.post("/add", async (req, res, next) => {
-  const { UserID, UserName,FirstName, LastName, Email, Password, Tel, Address } =
-    req.body;
-
+  const { UserID, UserName, FirstName, LastName, Email, Password, Tel, Address } = req.body;
   try {
     // เข้ารหัสรหัสผ่านก่อนที่จะเพิ่มลงในฐานข้อมูล
     const hashedPassword = await bcrypt.hash(Password, 10); // 10 เป็นค่าความคาดหวังในการเข้ารหัส (salt rounds)
 
     const userTableSQL =
-      "INSERT INTO app_users (UserID, UserName,FirstName, LastName, Email, Password, TEL, Address) VALUES (?, ?, ?, ?, ?, ?, ?,?)";
+      "INSERT INTO app_users (UserID, UserName, FirstName, LastName, Email, Password, TEL, Address) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
     const psychologistDetailsSQL =
-      "INSERT INTO app_user_roles (UserID, UserGroupID) VALUES (?,2)";
+      "INSERT INTO app_user_roles (UserID, UserGroupID) VALUES (?, 2)";
 
     dbCon.beginTransaction((err) => {
       if (err) {
@@ -196,7 +188,7 @@ router.post("/add", async (req, res, next) => {
 
       dbCon.query(
         userTableSQL,
-        [UserID, UserName,FirstName, LastName, Email, hashedPassword, Tel, Address],
+        [UserID, UserName, FirstName, LastName, Email, hashedPassword, Tel, Address],
         (error, userResults) => {
           if (error) {
             dbCon.rollback(() => {
@@ -240,6 +232,28 @@ router.post("/add", async (req, res, next) => {
                     });
                   });
                 } else {
+                  // เพิ่มรายการนัดหมอจิตเพื่อทุกวันในช่วง 365 วัน
+                  const startDate = new Date();
+                  for (let i = 0; i < 365; i++) {
+                    startDate.setDate(startDate.getDate() + 1);
+                    const formattedDate = startDate.toISOString().slice(0, 10);
+                    const slotDate = formattedDate;
+                    const timeSlots = ['08:00:00', '12:00:00', '15:00:00', '17:00:00'];
+
+                    timeSlots.forEach((time) => {
+                      const insertSQL = `INSERT INTO psychologist_appointment (psychologist_id, slot_date, slot_time, status) VALUES (?, ?, ?, '0')`;
+                      dbCon.query(
+                        insertSQL,
+                        [userId, slotDate, time],
+                        (err, results) => {
+                          if (err) {
+                            console.error("เกิดข้อผิดพลาดในการเพิ่มข้อมูล:", err);
+                          }
+                        }
+                      );
+                    });
+                  }
+
                   dbCon.commit((commitErr) => {
                     if (commitErr) {
                       dbCon.rollback(() => {
@@ -302,8 +316,9 @@ router.get("/payment", (req, res) => {
       req.flash("error", err);
       res.render("psychonist/payment", { title: "Payment", data: [] });
     } else {
+      // var target_path = path.resolve( __dirname, "../client/src/images/${ req.files.uploads[0].name }" );
       // Render the "psychonist/payment" template with the retrieved data
-      res.render("psychonist/payment", { title: "Payment", data: rows });
+      res.render("psychonist/payment", { title: "Payment", data: rows, });
     }
   });
 });
@@ -323,15 +338,17 @@ router.get("/paymentsdetails/", (req, res) => {
 });
 
 router.post("/approve-payment", async (req, res) => {
+  const paymentID = req.body.paymentID;
   const psychonist_appointments_id = req.body.psychologist_appointments_id; // รับค่า psychonist_appointments_id จากข้อมูลที่ส่งมาจากหน้า HTML
   const user_id = req.body.patient_id; // รับค่า user_id จากข้อมูลที่ส่งมาจากหน้า HTML
   const status = req.body.status;
 
   try {
     dbCon.query(
-      "UPDATE psychologist_appointment SET status = 1, user_id = ? WHERE id = ?",
-      [user_id, psychonist_appointments_id],
+      "UPDATE psychologist_appointment SET status = 1, user_id = ?, PaymentID = ? WHERE id = ?",
+      [user_id, paymentID, psychonist_appointments_id],
       (err, results, fields) => {
+    
         if (err) {
           console.log("Error : ", err);
           // ในกรณีที่มีข้อผิดพลาดในการเชื่อมต่อฐานข้อมูลหรือการส่งคำสั่ง SQL
@@ -368,6 +385,113 @@ router.post("/approve-payment", async (req, res) => {
   }
 });
 
+router.get("/edit/:UserID", (req, res) => {
+  const userID = req.params.UserID;
+    dbCon.query('SELECT * FROM app_users WHERE UserID = ?', [userID], (error, results) => {
+      if (error) {
+        console.error('Error querying the database:', error);
+        connection.end();
+        return res.status(500).send('Database query error');
+      }
+      if (results.length === 0) {
+        return res.status(404).send('Psychologist not found');
+      }
+      const psychonistData = results[0];
+      res.render("psychonist/edit", { title: "PsychologistDetails", psychonistData });
+    });
+});
+
+router.get("/details/:UserID", (req, res) => {
+  const userID = req.params.UserID;
+  dbCon.query('SELECT * FROM app_users WHERE UserID = ?', [userID], (error, results) => {
+    if (error) {
+      console.error('Error querying the database:', error);
+      connection.end();
+      return res.status(500).send('Database query error');
+    }
+    if (results.length === 0) {
+      return res.status(404).send('Psychologist not found');
+    }
+    const psychonistData = results[0];
+
+    dbCon.query('SELECT * FROM user_attachments WHERE UserID = ? AND FileType = 1', [userID], (error, attachments) => {
+      if (error) {
+        console.error('Error querying the database:', error);
+        return res.status(500).send('Database query error');
+      }
+
+      res.render("psychonist/details", { title: "PsychologistDetails", psychonistData, attachments });
+    });
+  });
+});
+
+
+router.post("/edit/:UserID", (req, res) => {
+  const userID = req.params.UserID;
+  const newName = req.body.name;
+  const newEmail = req.body.email;
+  const newFirstName = req.body['first-name'];
+  const newLastName = req.body['last-name'];
+  const newAddress = req.body.address;
+  const newTel = req.body.tel;
+
+  const updateQuery = 'UPDATE app_users SET UserName = ?, Email = ?, FirstName = ?, LastName = ?, Address = ?, Tel = ? WHERE UserID = ?';
+
+  dbCon.query(updateQuery, [newName, newEmail, newFirstName, newLastName, newAddress, newTel, userID], (error, results) => {
+    if (error) {
+      console.error('Error updating the database:', error);
+      return res.status(500).send('Database update error');
+    }
+    res.redirect('/admin/dashboard');
+  });
+});
+
+const storage = multer.diskStorage({
+  destination: "public/uploads",
+  filename: (req, file, cb) => {
+    const uniqueSuffix = `document_img_${Date.now()}-${Math.round(Math.random() * 1e9)}`;
+    const fileExtension = path.extname(file.originalname);
+    const newFilename = `${uniqueSuffix}${fileExtension}`;
+    cb(null, newFilename); // คุณไม่ต้องกำหนด req.file.filename ที่นี่
+  },
+});
+
+const upload = multer({
+  storage: storage,
+});
+
+router.post("/upload/:UserID", upload.single("document"), async (req,res) => {
+  const userID = req.params.UserID;
+  if (req.file) {
+    const fileName = req.file.filename;
+    const fileType = 1;
+    const addAttachment = "INSERT INTO user_attachments(UserID, FileName, FileType) VALUES(?, ?, ?)";
+    dbCon.query(addAttachment, [userID, fileName, fileType], (err, result) => {
+      if (err) {
+        console.error('เกิดข้อผิดพลาดในการเพิ่มข้อมูลเอกสารลงในฐานข้อมูล: ' + err.message);
+        res.send('ไม่สามารถเพิ่มข้อมูลเอกสารในฐานข้อมูล');
+      } else {
+        console.log('เพิ่มข้อมูลเอกสารในฐานข้อมูลสำเร็จ');
+        res.redirect('/admin/details/'+userID);
+      }
+    });
+  } else {
+    res.send('ไม่สามารถอัพโหลดเอกสาร');
+  }
+});
+
+router.get('/delete/:attachmentId/:UserId', (req, res) => {
+  const attachmentId = req.params.attachmentId;
+  const userID = req.params.UserId;
+
+  const sql = 'DELETE FROM user_attachments WHERE AttachmentID = ?';
+  dbCon.query(sql, [attachmentId], function (err) {
+      if (err) {
+          return res.send('ไม่สามารถลบข้อมูล');
+      }
+      return res.redirect('/admin/details/'+userID);
+  });
+});
 
 
 module.exports = router;

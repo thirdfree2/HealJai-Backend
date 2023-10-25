@@ -29,6 +29,7 @@
                         <tr>
                             <th scope="col">#</th>
                             <th scope="col">Appointment ID</th>
+                            <th scope="col">Payment ID</th>
                             <th scope="col">Patient ID</th>
                             <th scope="col">Slip</th>
                             <th scope="200px">TimeStamps</th>
@@ -43,13 +44,16 @@
                                 <%= (i+1) %>
                             </th>
                             <td>
+                                <%= data[i].id %>
+                            </td>
+                            <td>
                                 <%= data[i].psychologist_appointments_id %>
                             </td>
                             <td>
                                 <%= data[i].patient_id %>
                             </td>
                             <td>
-                                <img src="upload/images/slip/slip_1697639047131-121312067.jpg" width="250" height="300">
+                                <img src="..\uploads\<%= data[i].slip %>" width="250" height="300">
                             </td>
                             <td>
                                 <%= data[i].postingdate %>
@@ -57,6 +61,9 @@
                             <td>
                                 <form method="POST"
                                     action="/admin/approve-payment">
+                                    <input type="hidden"
+                                        name="paymentID"
+                                        value="<%= data[i].id %>">
                                     <input type="hidden"
                                         name="psychologist_appointments_id"
                                         value="<%= data[i].psychologist_appointments_id %>">
@@ -67,10 +74,6 @@
                                     <button type="submit"
                                         class="btn btn-success">Approve</button>
                                 </form>
-                            </td>
-                            <td>
-                                <a onclick="return alert('Are you sure?')"
-                                    class="btn btn-success btn-danger">Reject</a>
                             </td>
                         </tr>
                         <% }%>

@@ -86,24 +86,93 @@ router.get("/getappointments/:doc_name", (req, res) => {
 
 router.get("/calendar/:psychologist_id", (req, res) => {
   const psychologist_id = req.params.psychologist_id;
-  dbCon.query("SELECT * FROM psychologist_appointment WHERE psychologist_id  = ?",[psychologist_id], (error, results, fields) => {
-    if (error) {
-      console.error(
-        "Error while fetching psychologists from the database:",
-        error
-      );
-      return res.status(500).json({ error: "Internal server error" });
-    }
 
-    if (results === undefined || results.length === 0) {
-      return res.json({ error: false, data: [], message: "Empty" });
-    }
+  const currentDate = new Date();
+  const tomorrow = new Date(currentDate);
+  tomorrow.setDate(currentDate.getDate() + 1); // เพิ่ม 1 วันเพื่อให้มันเป็นวันพรุ่งนี้
 
-    return res.json({ error: false, data: results, message: "Success" });
-  });
+  const firstDayOfCurrentMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+  
+  const lastDayOfCurrentMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+  
+  dbCon.query("SELECT id, psychologist_id, DATE_FORMAT(slot_date, '%Y-%m-%d') as slot_date, slot_time, status FROM psychologist_appointment WHERE psychologist_id = ? AND slot_date BETWEEN ? AND ?",
+    [psychologist_id, tomorrow, lastDayOfCurrentMonth],
+    (error, results, fields) => {
+      if (error) {
+        console.error("Error while fetching psychologists from the database:", error);
+        return res.status(500).json({ error: "Internal server error" });
+      }
+
+      if (results === undefined || results.length === 0) {
+        return res.json({ error: false, data: [], message: "ไม่มีข้อมูลในเดือนนี้" });
+      }
+
+      return res.json({ error: false, data: results, message: "Success" });
+    }
+  );
 });
 
+router.post("/writeinsurtion", (req, res) => {
+  const UserID = req.body.UserID;
+  const PsychologistAppoinmentID = req.body.PsychologistAppoinmentID;
+  const FileName = req.body.FileName;
+  const Description = req.body.Description;
+  const Sender = req.body.Sender;
 
+  const updateUserQuery = `UPDATE app_users SET Status = 'None' WHERE UserID = ?`;
+
+  dbCon.beginTransaction(function(err) {
+    if (err) {
+      console.error(err);
+      res.status(500).json({ message: 'Error updating user and appointment status' });
+      return;
+    }
+
+    dbCon.query(updateUserQuery, [UserID], (userUpdateError, userUpdateResults) => {
+      if (userUpdateError) {
+        dbCon.rollback(function() {
+          console.error(userUpdateError);
+          res.status(500).json({ message: 'Error updating user status' });
+        });
+      } else {
+        const updateAppointmentQuery = `UPDATE appointment_table SET text_status = 'Done' WHERE psychologist_appointment_id = ?`;
+
+        dbCon.query(updateAppointmentQuery, [PsychologistAppoinmentID], (appointmentUpdateError, appointmentUpdateResults) => {
+          if (appointmentUpdateError) {
+            dbCon.rollback(function() {
+              console.error(appointmentUpdateError);
+              res.status(500).json({ message: 'Error updating appointment status' });
+            });
+          } else {
+            // Insert data into the user_attachments table
+            const insertAttachmentQuery = `INSERT INTO user_attachments (UserID, FileName, FileType, Sender, Description) VALUES (?, ?, ?, ?, ?)`;
+            const FileType = 2; // Assuming you want to set FileType to 2
+
+            dbCon.query(insertAttachmentQuery, [UserID, FileName, FileType, Sender, Description], (attachmentInsertError, attachmentInsertResults) => {
+              if (attachmentInsertError) {
+                dbCon.rollback(function() {
+                  console.error(attachmentInsertError);
+                  res.status(500).json({ message: 'Error inserting attachment data' });
+                });
+              } else {
+                dbCon.commit(function(commitError) {
+                  if (commitError) {
+                    dbCon.rollback(function() {
+                      console.error(commitError);
+                      res.status(500).json({ message: 'Error updating user and appointment status' });
+                    });
+                  } else {
+                    res.status(200).json({ message: 'User and appointment status updated, attachment inserted successfully' });
+                  }
+                });
+              }
+            });
+          }
+        });
+      }
+    });
+  });
+});
 
 
 module.exports = router;

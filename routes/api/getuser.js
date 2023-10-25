@@ -14,7 +14,7 @@ router.post("/login", (req, res) => {
   }
 
   const query1 =
-    "SELECT UserID, Email, Password, UserName FROM app_users WHERE Email = ?";
+    "SELECT UserID, Email, Password, UserName,Status FROM app_users WHERE Email = ?";
 
   dbCon.query(query1, [Email], async (err, results) => {
     if (err) {
@@ -56,6 +56,7 @@ router.post("/login", (req, res) => {
           email: userData.Email,
           id: userData.UserID,
           name: userData.UserName,
+          status: userData.Status,
           role_id: roleData ? roleData.UserGroupID : null, // ตรวจสอบว่ามี roleData หรือไม่
         };
 
@@ -109,12 +110,12 @@ router.post("/register", async (req, res) => {
 });
 
 const storage = multer.diskStorage({
-  destination: "upload/slip",
+  destination: "public/uploads",
   filename: (req, file, cb) => {
-    const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
+    const uniqueSuffix = `img_${Date.now()}-${Math.round(Math.random() * 1e9)}`;
     const fileExtension = path.extname(file.originalname);
-    const newFilename = `${file.fieldname}_${uniqueSuffix}${fileExtension}`;
-    cb(null, newFilename);
+    const newFilename = `${uniqueSuffix}${fileExtension}`;
+    cb(null, newFilename); // คุณไม่ต้องกำหนด req.file.filename ที่นี่
   },
 });
 
@@ -124,17 +125,29 @@ const upload = multer({
 
 router.post("/paymentrequest", upload.single("slip"), async (req, res) => {
   const { psychonist_appointments_id, user_id } = req.body;
-  const slipFileName = req.file.path;
+  const slipFileName = req.file.filename; // ใช้ req.file.filename ที่ได้จาก multer
   try {
     dbCon.query(
-      "INSERT INTO payment_table(psychologist_appointments_id , patient_id  , slip) VALUES(?,?,?)",
+      "INSERT INTO payment_table(psychologist_appointments_id, patient_id, slip) VALUES(?,?,?)",
       [psychonist_appointments_id, user_id, slipFileName],
       (err, results, fields) => {
         if (err) {
           console.log("Error : ", err);
           return res.status(400).send();
         }
-        return res.status(201).json({ message: "Success" });
+
+        // เมื่อคำขอชำระเงินสำเร็จ อัพเดตสถานะใน app_users
+        dbCon.query(
+          "UPDATE app_users SET Status = 'InAppointment' WHERE UserID = ?",
+          [user_id],
+          (updateErr, updateResults) => {
+            if (updateErr) {
+              console.log("Error updating user status: ", updateErr);
+              return res.status(500).send();
+            }
+            return res.status(201).json({ message: "Success" });
+          }
+        );
       }
     );
   } catch (err) {
@@ -142,5 +155,8 @@ router.post("/paymentrequest", upload.single("slip"), async (req, res) => {
     return res.status(500).send();
   }
 });
+
+
+
 
 module.exports = router;
