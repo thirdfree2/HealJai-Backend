@@ -310,6 +310,31 @@ router.get("/appointment", (req, res) => {
   );
 });
 
+router.get("/payment/get", (req, res) => {
+  sql = `SELECT payment_table.*, app_users.UserName, psychologist_appointment.psychologist_id
+  FROM payment_table
+  INNER JOIN app_users ON payment_table.patient_id = app_users.UserID
+  INNER JOIN psychologist_appointment ON payment_table.psychologist_appointments_id = psychologist_appointment.id;
+  
+  `
+  dbCon.query(sql, (error, results, fields) => {
+    if (error) {
+      console.error(
+        "Error while fetching psychologists from the database:",
+        error
+      );
+      return res.status(500).json({ error: "Internal server error" });
+    }
+
+    if (results === undefined || results.length === 0) {
+      return res.json({ error: false, data: [], message: "Empty" });
+    }
+
+    return res.json({ error: false, data: results, message: "Success" });
+  });
+});
+
+
 router.get("/payment", (req, res) => {
   dbCon.query("SELECT * FROM payment_table ORDER BY id desc", (err, rows) => {
     if (err) {
@@ -323,7 +348,7 @@ router.get("/payment", (req, res) => {
   });
 });
 
-router.get("/paymentsdetails/", (req, res) => {
+router.get("/paymentsdetails", (req, res) => {
   const id = req.params.id;
   const UserID = req.query.user_name;
   const doc_name = req.query.doc_name;

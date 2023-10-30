@@ -29,6 +29,7 @@
                             <tr>
                                 <th scope="col">RefundID</th>
                                 <th scope="col">PaymentID</th>
+                                <th scope="col">UserID</th>
                                 <th scope="200px">Action</th>
                             </tr>
                         </thead>
@@ -40,6 +41,9 @@
                                     </th>
                                     <td>
                                         <%= data[i].PaymentID %>
+                                    </td>
+                                    <td>
+                                        <%= data[i].UserID %>
                                     </td>
                                     <td>
                                         <a href="/admin/details/<%= data[i].UserID%>">Details</a>
