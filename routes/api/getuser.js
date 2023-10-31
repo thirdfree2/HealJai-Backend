@@ -157,6 +157,30 @@ router.post("/paymentrequest", upload.single("slip"), async (req, res) => {
 });
 
 
+router.get("/insurtion/:userID", (req,res) => {
+  const userID = req.params.userID;
+  sql = `
+  SELECT user_attachments.*, app_users.UserName , app_users.UserID
+  FROM user_attachments
+  INNER JOIN app_users ON user_attachments.Sender = app_users.UserID
+  WHERE user_attachments.UserID = ? AND user_attachments.FileType = 2
+  `;
+  dbCon.query(sql,[userID], (error, results, fields) => {
+    if (error) {
+      console.error(
+        "Error while fetching psychologists from the database:",
+        error
+      );
+      return res.status(500).json({ error: "Internal server error" });
+    }
+
+    if (results === undefined || results.length === 0) {
+      return res.json({ error: false, data: [], message: "Empty" });
+    }
+
+    return res.json({ error: false, data: results, message: "Success" });
+  });
+});
 
 
 module.exports = router;

@@ -335,7 +335,6 @@ router.get("/payment/get", (req, res) => {
   });
 });
 
-
 router.get("/payment", (req, res) => {
   sql = `SELECT payment_table.*, app_users.UserName AS patient_username, psychologist_appointment.psychologist_id, app_users_psychologist.UserName AS psychologist_username
   FROM payment_table
@@ -354,7 +353,6 @@ router.get("/payment", (req, res) => {
     }
   });
 });
-
 
 router.get("/paymentsdetails", (req, res) => {
   const id = req.params.id;
@@ -457,7 +455,6 @@ router.get("/details/:UserID", (req, res) => {
     });
   });
 });
-
 
 router.post("/edit/:UserID", (req, res) => {
   const userID = req.params.UserID;

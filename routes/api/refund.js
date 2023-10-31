@@ -7,50 +7,55 @@ const multer = require("multer");
 const path = require("path");
 
 router.get("/", (req, res, next) => {
-    dbCon.query(
-        "SELECT * FROM user_refunds",
-        (err, rows) => {
-          if (err) {
-            req.flash("error", err);
-            res.render("psychonist/refund", { data: "" });
-          } else {
-            res.render("psychonist/refund", { data: rows });
-          }
-        }
-      );
+  sql = `SELECT user_refunds.*, payment_table.*
+  FROM user_refunds
+  INNER JOIN payment_table ON user_refunds.PaymentID = payment_table.id
+  ORDER BY user_refunds.RefundID DESC;     
+  `;
+  dbCon.query(sql, (err, rows) => {
+    if (err) {
+      req.flash("error", err);
+      res.render("psychonist/refund", { data: "" });
+    } else {
+      res.render("psychonist/refund", { data: rows });
+    }
+  });
 });
+
 
 router.get("/get", (req, res, next) => {
-  dbCon.query(
-      "SELECT * FROM user_refunds",
-      (err, rows) => {
-        if (err) {
-          req.flash("error", err);
-          res.render("psychonist/refund", { data: "" });
-        } else {
-          res.render("psychonist/refund", { data: rows });
-        }
-      }
-    );
+  // dbCon.query(
+  //     "SELECT * FROM user_refunds",
+  //     (err, rows) => {
+  //       if (err) {
+  //         req.flash("error", err);
+  //         res.render("psychonist/refund", { data: "" });
+  //       } else {
+  //         res.render("psychonist/refund", { data: rows });
+  //       }
+  //     }
+  //   );
 
-  // sql = `SELECT * FROM user_refunds`
-  // dbCon.query(sql, (error, results, fields) => {
-  //   if (error) {
-  //     console.error(
-  //       "Error while fetching psychologists from the database:",
-  //       error
-  //     );
-  //     return res.status(500).json({ error: "Internal server error" });
-  //   }
+  sql = `SELECT user_refunds.*, payment_table.*
+  FROM user_refunds
+  INNER JOIN payment_table ON user_refunds.PaymentID = payment_table.id    
+  `;
+  dbCon.query(sql, (error, results, fields) => {
+    if (error) {
+      console.error(
+        "Error while fetching psychologists from the database:",
+        error
+      );
+      return res.status(500).json({ error: "Internal server error" });
+    }
 
-  //   if (results === undefined || results.length === 0) {
-  //     return res.json({ error: false, data: [], message: "Empty" });
-  //   }
+    if (results === undefined || results.length === 0) {
+      return res.json({ error: false, data: [], message: "Empty" });
+    }
 
-  //   return res.json({ error: false, data: results, message: "Success" });
-  // });
+    return res.json({ error: false, data: results, message: "Success" });
+  });
 });
-
 
 router.post("/request", (req, res, next) => {
   const PaymentID = req.body.PaymentID;
@@ -68,7 +73,7 @@ router.post("/request", (req, res, next) => {
   const insertQuery = `
     INSERT INTO user_refunds(PaymentID, Promtpay)
     VALUES(?, ?)`;
-    
+
   // สร้างคำสั่ง SQL สำหรับอัปเดตค่าในตาราง app_users
   const updateUserStatusQuery = `
     UPDATE app_users
@@ -96,56 +101,75 @@ router.post("/request", (req, res, next) => {
         });
       } else {
         // ลบข้อมูลในตาราง appointment_table
-        dbCon.query(deleteQuery, [PsychologistAppoinmentID], (deleteErr, deleteResults) => {
-          if (deleteErr) {
-            console.error("Error deleting from appointment_table: " + deleteErr);
-            dbCon.rollback(() => {
-              res.status(500).send("Error deleting from appointment_table");
-            });
-          } else {
-            // เพิ่มค่าในตาราง user_refunds
-            dbCon.query(insertQuery, [PaymentID, Promtpay], (insertErr, insertResults) => {
-              if (insertErr) {
-                console.error("Error inserting into user_refunds: " + insertErr);
-                dbCon.rollback(() => {
-                  res.status(500).send("Error inserting into user_refunds");
-                });
-              } else {
-                // อัปเดตค่าในตาราง app_users
-                dbCon.query(updateUserStatusQuery, [UserID], (updateUserErr, updateUserResults) => {
-                  if (updateUserErr) {
-                    console.error("Error updating app_users: " + updateUserErr);
+        dbCon.query(
+          deleteQuery,
+          [PsychologistAppoinmentID],
+          (deleteErr, deleteResults) => {
+            if (deleteErr) {
+              console.error(
+                "Error deleting from appointment_table: " + deleteErr
+              );
+              dbCon.rollback(() => {
+                res.status(500).send("Error deleting from appointment_table");
+              });
+            } else {
+              // เพิ่มค่าในตาราง user_refunds
+              dbCon.query(
+                insertQuery,
+                [PaymentID, Promtpay],
+                (insertErr, insertResults) => {
+                  if (insertErr) {
+                    console.error(
+                      "Error inserting into user_refunds: " + insertErr
+                    );
                     dbCon.rollback(() => {
-                      res.status(500).send("Error updating app_users");
+                      res.status(500).send("Error inserting into user_refunds");
                     });
                   } else {
-                    // ทำการ commit และสิ้นสุด transaction
-                    dbCon.commit((commitErr) => {
-                      if (commitErr) {
-                        console.error("Error committing transaction: " + commitErr);
-                        dbCon.rollback(() => {
-                          res.status(500).send("Error committing transaction");
-                        });
-                      } else {
-                        // ทุกอย่างสำเร็จ
-                        res.json({ message: "Refund request processed successfully." });
+                    // อัปเดตค่าในตาราง app_users
+                    dbCon.query(
+                      updateUserStatusQuery,
+                      [UserID],
+                      (updateUserErr, updateUserResults) => {
+                        if (updateUserErr) {
+                          console.error(
+                            "Error updating app_users: " + updateUserErr
+                          );
+                          dbCon.rollback(() => {
+                            res.status(500).send("Error updating app_users");
+                          });
+                        } else {
+                          // ทำการ commit และสิ้นสุด transaction
+                          dbCon.commit((commitErr) => {
+                            if (commitErr) {
+                              console.error(
+                                "Error committing transaction: " + commitErr
+                              );
+                              dbCon.rollback(() => {
+                                res
+                                  .status(500)
+                                  .send("Error committing transaction");
+                              });
+                            } else {
+                              // ทุกอย่างสำเร็จ
+                              res.json({
+                                message:
+                                  "Refund request processed successfully.",
+                              });
+                            }
+                          });
+                        }
                       }
-                    });
+                    );
                   }
-                });
-              }
-            });
+                }
+              );
+            }
           }
-        });
+        );
       }
     });
   });
 });
-
-
-
-
-
-
 
 module.exports = router;

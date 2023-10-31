@@ -30,7 +30,8 @@
                                 <th scope="col">RefundID</th>
                                 <th scope="col">PaymentID</th>
                                 <th scope="col">UserID</th>
-                                <th scope="200px">Action</th>
+                                <th scope="col">Psychologist Appointments ID</th>
+                                <th scope="col">TimeStamps</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -43,11 +44,15 @@
                                         <%= data[i].PaymentID %>
                                     </td>
                                     <td>
-                                        <%= data[i].UserID %>
+                                        <%= data[i].patient_id %>
                                     </td>
                                     <td>
-                                        <a href="/admin/details/<%= data[i].UserID%>">Details</a>
+                                        <%= data[i].psychologist_appointments_id %>
                                     </td>
+                                    <td>
+                                        <%= data[i].postingdate %>
+                                    </td>
+                                    <!-- psychologist_appointments_id -->
                                 </tr>
                                 <% }%>
                         </tbody>
