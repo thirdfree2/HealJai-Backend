@@ -20,6 +20,37 @@ router.get("/", (req, res, next) => {
       );
 });
 
+router.get("/get", (req, res, next) => {
+  dbCon.query(
+      "SELECT * FROM user_refunds",
+      (err, rows) => {
+        if (err) {
+          req.flash("error", err);
+          res.render("psychonist/refund", { data: "" });
+        } else {
+          res.render("psychonist/refund", { data: rows });
+        }
+      }
+    );
+
+  // sql = `SELECT * FROM user_refunds`
+  // dbCon.query(sql, (error, results, fields) => {
+  //   if (error) {
+  //     console.error(
+  //       "Error while fetching psychologists from the database:",
+  //       error
+  //     );
+  //     return res.status(500).json({ error: "Internal server error" });
+  //   }
+
+  //   if (results === undefined || results.length === 0) {
+  //     return res.json({ error: false, data: [], message: "Empty" });
+  //   }
+
+  //   return res.json({ error: false, data: results, message: "Success" });
+  // });
+});
+
 
 router.post("/request", (req, res, next) => {
   const PaymentID = req.body.PaymentID;

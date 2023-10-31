@@ -29,8 +29,8 @@
                         <tr>
                             <th scope="col">#</th>
                             <th scope="col">Appointment ID</th>
-                            <th scope="col">Payment ID</th>
-                            <th scope="col">Patient ID</th>
+                            <th scope="col">Psychologist UserName</th>
+                            <th scope="col">Patient UserName</th>
                             <th scope="col">Slip</th>
                             <th scope="200px">TimeStamps</th>
                             <th scope="200px">Action</th>
@@ -47,10 +47,10 @@
                                 <%= data[i].id %>
                             </td>
                             <td>
-                                <%= data[i].psychologist_appointments_id %>
+                                <%= data[i].psychologist_username %>
                             </td>
                             <td>
-                                <%= data[i].patient_id %>
+                                <%= data[i].patient_username %>
                             </td>
                             <td>
                                 <img src="..\uploads\<%= data[i].slip %>" width="250" height="300">

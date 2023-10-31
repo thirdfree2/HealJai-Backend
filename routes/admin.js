@@ -311,11 +311,12 @@ router.get("/appointment", (req, res) => {
 });
 
 router.get("/payment/get", (req, res) => {
-  sql = `SELECT payment_table.*, app_users.UserName, psychologist_appointment.psychologist_id
+  sql = `SELECT payment_table.*, app_users.UserName AS patient_username, psychologist_appointment.psychologist_id, app_users_psychologist.UserName AS psychologist_username
   FROM payment_table
   INNER JOIN app_users ON payment_table.patient_id = app_users.UserID
-  INNER JOIN psychologist_appointment ON payment_table.psychologist_appointments_id = psychologist_appointment.id;
-  
+  INNER JOIN psychologist_appointment ON payment_table.psychologist_appointments_id = psychologist_appointment.id
+  INNER JOIN app_users AS app_users_psychologist ON psychologist_appointment.psychologist_id = app_users_psychologist.UserID
+  ORDER BY payment_table.id DESC;   
   `
   dbCon.query(sql, (error, results, fields) => {
     if (error) {
@@ -336,17 +337,24 @@ router.get("/payment/get", (req, res) => {
 
 
 router.get("/payment", (req, res) => {
-  dbCon.query("SELECT * FROM payment_table ORDER BY id desc", (err, rows) => {
+  sql = `SELECT payment_table.*, app_users.UserName AS patient_username, psychologist_appointment.psychologist_id, app_users_psychologist.UserName AS psychologist_username
+  FROM payment_table
+  INNER JOIN app_users ON payment_table.patient_id = app_users.UserID
+  INNER JOIN psychologist_appointment ON payment_table.psychologist_appointments_id = psychologist_appointment.id
+  INNER JOIN app_users AS app_users_psychologist ON psychologist_appointment.psychologist_id = app_users_psychologist.UserID
+  ORDER BY payment_table.id DESC;`;
+  dbCon.query(sql, (err, rows) => {
     if (err) {
       req.flash("error", err);
       res.render("psychonist/payment", { title: "Payment", data: [] });
     } else {
       // var target_path = path.resolve( __dirname, "../client/src/images/${ req.files.uploads[0].name }" );
       // Render the "psychonist/payment" template with the retrieved data
-      res.render("psychonist/payment", { title: "Payment", data: rows, });
+      res.render("psychonist/payment", { title: "Payment", data: rows });
     }
   });
 });
+
 
 router.get("/paymentsdetails", (req, res) => {
   const id = req.params.id;

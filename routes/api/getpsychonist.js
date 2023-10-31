@@ -167,6 +167,7 @@ router.get("/calendar/:psychologist_id", (req, res) => {
 router.get("/calendar/:psychologist_id/demo", (req, res) => {
   const psychologist_id = req.params.psychologist_id;
   const currentDate = new Date();
+  currentDate.setDate(currentDate.getDate() + 1);
   const currentYear = currentDate.getFullYear();
   const currentMonth = currentDate.getMonth() + 1;
 
