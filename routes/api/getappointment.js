@@ -139,4 +139,38 @@ router.get("/appoint/:psycholonist_id", (req, res) => {
   );
 });
 
+
+router.get("/incoming/:user_id", (req, res) => {
+  const userId = req.params.user_id;
+  dbCon.query(
+    `
+     SELECT appointment_table.*, psychologist_appointment.*, app_users.*
+     FROM appointment_table
+     INNER JOIN psychologist_appointment
+     ON appointment_table.psychologist_appointment_id = psychologist_appointment.id
+     INNER JOIN app_users
+     ON psychologist_appointment.psychologist_id = app_users.UserID
+     WHERE psychologist_appointment.user_id = ?
+     AND appointment_table.text_status = 'Incoming';
+    `,
+    [userId],
+    (error, results, fields) => {
+      if (error) {
+        console.error("Error while fetching from the database:", error);
+        return res.status(500).json({ error: "Internal server error" });
+      }
+
+      if (results === undefined || results.length === 0) {
+        return res.json({ error: false, data: [], message: "Empty" });
+      }
+      results = results.map((row) => ({
+        ...row,
+        slot_date: row.slot_date.toISOString().split("T")[0],
+        slot_time: row.slot_time.substring(0, 5),
+      }));
+      return res.json({ error: false, data: results, message: "Success" });
+    }
+  );
+});
+
 module.exports = router;

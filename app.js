@@ -21,11 +21,9 @@ const httpServer= http.createServer(app);
 
 const io = require('socket.io')(httpServer, {
   cors: {
-   origin: "http://localhost:3000", //specific origin you want to give access to,
+   origin: "http://localhost:3000",
 },
 });
-
-// .join(__dirname, '/public')
 
 app.use(express.static('public'));
 app.set('views', path.join(__dirname, 'views'));
