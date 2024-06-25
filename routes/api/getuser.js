@@ -123,12 +123,12 @@ const upload = multer({
   storage: storage,
 });
 
-router.post("/paymentrequest", upload.single("slip"), async (req, res) => {
+router.post("/paymentrequest", async (req, res) => {
   const { psychonist_appointments_id, user_id } = req.body;
-  const slipFileName = req.file.filename; // ใช้ req.file.filename ที่ได้จาก multer
+  const slipFileName = 'Hello'// ใช้ req.file.filename ที่ได้จาก multer
   try {
     dbCon.query(
-      "INSERT INTO payment_table(psychologist_appointments_id, patient_id, slip) VALUES(?,?,?)",
+      "INSERT INTO payment_table(psychologist_appointments_id, patient_id, slip) VALUES(?,36,404)",
       [psychonist_appointments_id, user_id, slipFileName],
       (err, results, fields) => {
         if (err) {

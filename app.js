@@ -1,3 +1,5 @@
+
+const cors = require('cors')
 const express = require('express');
 const http = require('http');
 const path = require('path');
@@ -20,10 +22,13 @@ const app = express();
 const httpServer= http.createServer(app);
 
 const io = require('socket.io')(httpServer, {
+
   cors: {
    origin: "http://localhost:3000",
 },
 });
+
+app.use(cors()); 
 
 app.use(express.static('public'));
 app.set('views', path.join(__dirname, 'views'));
